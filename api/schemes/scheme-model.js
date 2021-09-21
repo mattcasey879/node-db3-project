@@ -20,9 +20,9 @@ function find() { // EXERCISE A
  const data = db('schemes as sc')
       .leftJoin('steps', 'sc.scheme_id', 'steps.scheme_id')
       .count('steps.step_id as number_of_steps')
-      .select("sc.scheme_id", "sc.scheme_name")
+      .select("sc.*")
       .groupBy('sc.scheme_id')
-      .orderBy('sc.scheme_id', 'asc')
+      .orderBy('sc.scheme_id')
       return data
 }
 
@@ -94,17 +94,17 @@ function find() { // EXERCISE A
   */
       const data = await db('schemes as sc')
       .leftJoin('steps as st', 'sc.scheme_id', "st.scheme_id")
-      .select('sc.scheme_name as scheme_name', 'st.instructions', 'st.step_id', 'st.step_number','sc.scheme_id as scheme_id')
+      .select("st.*", "sc.scheme_name", "sc.scheme_id")
       .where('sc.scheme_id', scheme_id)
       .orderBy('st.step_number', 'asc')
 
       const result = {
         scheme_id: data[0].scheme_id,
         scheme_name: data[0].scheme_name,
-        steps: !data[0].step_id ? "NO steps for this scheme!!" :data.map(row => ({ step_id: row.step_id, step_number: row.step_number, instructions: row.instructions}))
+        steps: !data[0].step_id ? [] :data.map(row => ({ step_id: row.step_id, step_number: row.step_number, instructions: row.instructions}))
       }
       
-      console.log(result)
+     
       return result
       
 }
@@ -134,8 +134,8 @@ function find() { // EXERCISE A
       .join("steps as st", "sc.scheme_id", "st.scheme_id")
       .select('st.step_id', "st.step_number", "st.instructions", "sc.scheme_name",)
       .where("sc.scheme_id", scheme_id)
+      .orderBy("st.step_number")
       
-     console.log(data)
       return data
 }
 
@@ -155,7 +155,10 @@ async function addStep(scheme_id, step) { // EXERCISE E
     and resolves to _all the steps_ belonging to the given `scheme_id`,
     including the newly created one.
   */
- await db('steps').insert(step)
+ await db('steps').insert({
+   ...step,
+   scheme_id: scheme_id
+ })
   const steps = findSteps(scheme_id)
   return steps
 
