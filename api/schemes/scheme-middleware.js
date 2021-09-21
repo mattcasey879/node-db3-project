@@ -1,3 +1,6 @@
+const e = require("express")
+const Schema = require("./scheme-model")
+
 /*
   If `scheme_id` does not exist in the database:
 
@@ -7,7 +10,16 @@
   }
 */
 const checkSchemeId = (req, res, next) => {
-
+  const { scheme_id } = req.params
+  Schema.findById(scheme_id)
+  .then(scheme => {
+    console.log(scheme)
+    if (scheme) {
+      next()
+    } else {
+      next({ status: 400, message: `scheme with scheme_id ${scheme_id} not found`})
+    }
+  }) .catch(next)
 }
 
 /*
